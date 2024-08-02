@@ -12,6 +12,7 @@ app = FastAPI(title="Caching Layer", version="0.1.0")
 CAPACITY = int(os.getenv("CACHE_CAPACITY", "1000"))
 TTL = int(os.getenv("CACHE_TTL_SECONDS", "60"))
 cache = LRUCache(capacity=CAPACITY, ttl_seconds=TTL)
+DB_AVAILABLE = True
 
 
 class SetRequest(BaseModel):
@@ -21,7 +22,13 @@ class SetRequest(BaseModel):
 
 @app.on_event("startup")
 def on_startup():
-    init_db()
+    global DB_AVAILABLE
+    try:
+        init_db()
+        DB_AVAILABLE = True
+    except Exception:
+        # База недоступна — сервис всё равно стартует, но операции будут частично работать
+        DB_AVAILABLE = False
 
 
 @app.get("/health")
@@ -57,7 +64,10 @@ def cache_get(key: str):
     if val is not None:
         return {"key": key, "value": val, "source": "cache"}
     # Fallback to DB
-    row = db_get(key)
+    try:
+        row = db_get(key)
+    except Exception:
+        row = None
     if row is None:
         raise HTTPException(status_code=404, detail="Key not found")
     cache.set(key, row["value"])
@@ -67,13 +77,21 @@ def cache_get(key: str):
 @app.post("/cache/set")
 def cache_set(req: SetRequest):
     # Write-through: write to DB and cache
-    db_set(req.key, req.value)
+    db_ok = True
+    try:
+        db_set(req.key, req.value)
+    except Exception:
+        db_ok = False
     cache.set(req.key, req.value)
-    return {"ok": True}
+    return {"ok": True, "db_written": db_ok}
 
 
 @app.delete("/cache/delete")
 def cache_delete(key: str):
     removed = cache.delete(key)
-    db_removed = db_delete(key)
+    db_removed = False
+    try:
+        db_removed = db_delete(key)
+    except Exception:
+        db_removed = False
     return {"cache_removed": removed, "db_removed": db_removed}

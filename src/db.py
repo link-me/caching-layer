@@ -1,18 +1,26 @@
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
-
 
 def get_conn():
-    dsn = os.getenv(
-        "DATABASE_URL",
-        "postgresql://cache_user:cache_pass@127.0.0.1:5432/cache_db",
-    )
-    return psycopg2.connect(dsn)
+    try:
+        import psycopg
+        from psycopg.rows import dict_row
+    except Exception:
+        return None
+    try:
+        dsn = os.getenv(
+            "DATABASE_URL",
+            "postgresql://cache_user:cache_pass@127.0.0.1:5432/cache_db",
+        )
+        conn = psycopg.connect(dsn, row_factory=dict_row, connect_timeout=3)
+        return conn
+    except Exception:
+        return None
 
 
-def init_db():
+def init_db() -> bool:
     conn = get_conn()
+    if not conn:
+        return False
     try:
         with conn:
             with conn.cursor() as cur:
@@ -25,23 +33,38 @@ def init_db():
                     );
                     """
                 )
+        return True
+    except Exception:
+        return False
     finally:
-        conn.close()
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 
 def db_get(key: str) -> dict | None:
     conn = get_conn()
+    if not conn:
+        return None
     try:
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        with conn.cursor() as cur:
             cur.execute("SELECT key, value, updated_at FROM cache_entries WHERE key=%s", (key,))
             row = cur.fetchone()
-            return dict(row) if row else None
+            return row if row else None
+    except Exception:
+        return None
     finally:
-        conn.close()
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 
-def db_set(key: str, value: str) -> None:
+def db_set(key: str, value: str) -> bool:
     conn = get_conn()
+    if not conn:
+        return False
     try:
         with conn:
             with conn.cursor() as cur:
@@ -54,16 +77,29 @@ def db_set(key: str, value: str) -> None:
                     """,
                     (key, value),
                 )
+        return True
+    except Exception:
+        return False
     finally:
-        conn.close()
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 
 def db_delete(key: str) -> bool:
     conn = get_conn()
+    if not conn:
+        return False
     try:
         with conn:
             with conn.cursor() as cur:
                 cur.execute("DELETE FROM cache_entries WHERE key=%s", (key,))
                 return cur.rowcount > 0
+    except Exception:
+        return False
     finally:
-        conn.close()
+        try:
+            conn.close()
+        except Exception:
+            pass

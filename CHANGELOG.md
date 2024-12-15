@@ -1,5 +1,6 @@
-﻿# Changelog
+# Changelog
 
+- 2024-12-15: Docs: switch to psycopg v3 (`psycopg[binary]`) in README; add notes on lazy import and Windows/Python 3.13 compatibility
 - 2025-06-17: Update docs
 - 2025-06-21: Add feature
 - 2025-06-26: Update docs

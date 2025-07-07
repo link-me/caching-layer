@@ -4,3 +4,4 @@
 # Update docs
 # Refactor module
 # Update dependencies
+# Fix auth bug

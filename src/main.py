@@ -6,3 +6,4 @@
 # Update dependencies
 # Fix auth bug
 # Add feature
+# Code cleanup

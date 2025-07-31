@@ -9,3 +9,4 @@
 - 2025-07-07: Fix auth bug
 - 2025-07-09: Add feature
 - 2025-07-10: Code cleanup
+- 2025-07-31: Enhance logging

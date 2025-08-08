@@ -8,3 +8,4 @@
 # Add feature
 # Code cleanup
 # Fix auth bug
+# Setup CI

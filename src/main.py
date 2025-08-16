@@ -9,3 +9,4 @@
 # Code cleanup
 # Fix auth bug
 # Setup CI
+# Improve performance

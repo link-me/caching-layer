@@ -11,3 +11,4 @@
 # Setup CI
 # Improve performance
 # Add tests
+# Update dependencies

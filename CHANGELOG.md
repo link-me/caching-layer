@@ -15,3 +15,4 @@
 - 2025-08-15: Add tests
 - 2025-08-16: Improve performance
 - 2025-09-08: Add tests
+- 2025-09-11: Update dependencies

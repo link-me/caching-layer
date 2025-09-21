@@ -12,3 +12,4 @@
 # Improve performance
 # Add tests
 # Update dependencies
+# Enhance logging

@@ -18,3 +18,4 @@
 - 2025-09-11: Update dependencies
 - 2025-09-17: Add tests
 - 2025-09-21: Enhance logging
+- 2025-10-07: Code cleanup
